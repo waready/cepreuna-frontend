@@ -1,0 +1,157 @@
+/* Estilos base (mobile-first) */
+.quizzes-container {
+  padding: 1rem;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.quizzes-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.quizzes-description {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+.quizzes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.quiz-card {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quiz-card:hover {
+  transform: translateY(-0.25rem);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.quiz-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.quiz-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.25rem;
+}
+
+.quiz-tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  align-self: flex-start;
+}
+
+.quiz-tag.intermedio {
+  background-color: #f39c12;
+  color: white;
+}
+
+.quiz-tag.avanzado {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.quiz-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.quiz-score {
+  background-color: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+.quiz-description {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.quiz-start-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.quiz-start-button:hover {
+  background-color: #2980b9;
+}
+
+.message {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+}
+
+.message.loading {
+  color: #3498db;
+}
+
+.message.error {
+  color: #e74c3c;
+}
+
+/* Media queries para tablets */
+@media (min-width: 768px) {
+  .quizzes-container {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
+  
+  .quizzes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .quiz-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+/* Media queries para escritorio */
+@media (min-width: 1024px) {
+  .quizzes-container {
+    max-width: 1200px;
+    padding: 2rem;
+  }
+  
+  .quizzes-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .quizzes-description {
+    font-size: 1.1rem;
+  }
+}
+
