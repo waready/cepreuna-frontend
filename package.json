@@ -1,6 +1,7 @@
 {
   "name": "cepreuna-frontend",
   "version": "0.1.0",
+  "homepage": "https://waready.github.io/cepreuna-frontend",
   "private": true,
   "dependencies": {
     "axios": "^1.6.7",
@@ -15,7 +16,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.5.1"
+    "@testing-library/user-event": "^14.5.1",
+    "gh-pages": "^6.3.0"
   }
 }
