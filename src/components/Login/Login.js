@@ -42,7 +42,7 @@ const Login = ({ onLogin }) => {
                 <form onSubmit={handleSubmit} className="login-form">
                     <div className="text-center">
                         <img src="/logo.png" alt="Logo" className="login-logo" />
-                        <h2 className="login-title">CEPREUNA APP</h2>
+                        <h2 className="login-title">APP CEPREUNA</h2>
                     </div>
 
                     <div className="form-group">

@@ -8,7 +8,11 @@ import {
   FaUser,
   FaChalkboardTeacher,
   FaQuestionCircle,
+  FaArrowLeft,
+  FaArrowRight,
 } from "react-icons/fa";
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 import "./Dashboard.css";
 import Seminarios from "../Seminarios/Seminarios";
 import Quizzes from "../Quizzes/Quizzes";
@@ -27,31 +31,12 @@ const Dashboard = ({ onLogout, userData }) => {
     },
   ]);
   const [postsLoading, setPostsLoading] = useState(true);
-  useEffect(() => {
-    const fetchPublicaciones = async () => {
-      try {
-        const res = await api.get("/publicaciones?page=1&tipo=1");
-        if (res.data?.data) {
-          const nuevosPosts = res.data.data.map((item) => ({
-            id: item.id,
-            nombre: `Usuario ${item.user_id}`,
-            contenido: item.descripcion,
-            rol: item.rol?.name || "Estudiante",
-            thumb: `https://app.cepreuna.edu.pe/storage/${item.imagen_tumb}`,
-          }));
-          setPosts((prev) => [...nuevosPosts, ...prev]); // coloca los nuevos primero
-        }
-      } catch (err) {
-        console.error("Error al obtener publicaciones:", err);
-      } finally {
-        setPostsLoading(false);
-      }
-    };
-
-    if (userData?.nombre) {
-      fetchPublicaciones();
-    }
-  }, [userData]);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    lastPage: 1,
+    nextPageUrl: null,
+    prevPageUrl: null,
+  });
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -60,6 +45,43 @@ const Dashboard = ({ onLogout, userData }) => {
     baseURL: process.env.REACT_APP_API_BASE_URL,
     withCredentials: true,
   });
+
+  const fetchPublicaciones = async (page = 1) => {
+    try {
+      setPostsLoading(true);
+      const res = await api.get(`/publicaciones?page=${page}&tipo=1`);
+      if (res.data?.data) {
+        const nuevosPosts = res.data.data.map((item) => ({
+          id: item.id,
+          nombre: item.datos_usuario?.nombres || `Usuario ${item.user_id}`,
+          contenido: item.descripcion,
+          rol: item.rol?.name || "Estudiante",
+          thumb: item.datos_usuario?.path_foto || `https://app.cepreuna.edu.pe/storage/publicaciones/${item.imagen_tumb}`,
+          imagen_pub: item.imagen_pub ? `https://app.cepreuna.edu.pe/storage/publicaciones/${item.imagen_pub}` : null,
+          like: item.like,
+          created_at: item.created_at,
+        }));
+        setPosts(nuevosPosts);
+        setPagination({
+          currentPage: res.data.current_page,
+          lastPage: res.data.last_page,
+          nextPageUrl: res.data.next_page_url,
+          prevPageUrl: res.data.prev_page_url,
+        });
+      }
+    } catch (err) {
+      console.error("Error al obtener publicaciones:", err);
+      setError("Error al cargar las publicaciones");
+    } finally {
+      setPostsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userData?.nombre) {
+      fetchPublicaciones();
+    }
+  }, [userData]);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -116,6 +138,18 @@ const Dashboard = ({ onLogout, userData }) => {
     }
   };
 
+  const handleNextPage = () => {
+    if (pagination.nextPageUrl) {
+      fetchPublicaciones(pagination.currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (pagination.prevPageUrl) {
+      fetchPublicaciones(pagination.currentPage - 1);
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "perfil":
@@ -137,10 +171,24 @@ const Dashboard = ({ onLogout, userData }) => {
       default:
         return (
           <section>
+            {/* Área para crear nuevos posts */}
             <div className="post-box">
               <div className="post-header">
-                <img src={userData.avatar} className="avatar-sm" alt="avatar" />
-                <strong>{userData.nombre}</strong>
+                <div className="avatar-container">
+                  {userData.avatar ? (
+                    <img
+                      src={userData.avatar}
+                      className="avatar-sm"
+                      alt="avatar"
+                    />
+                  ) : (
+                    <FaUser size={24} color="gray" />
+                  )}
+                </div>
+                <div className="post-user-info">
+                  <div className="post-user-name">{userData.nombre}</div>
+                  <div className="post-user-role">Estudiante</div>
+                </div>
               </div>
               <textarea
                 placeholder={`¿Qué estás pensando ${userData.nombre}?`}
@@ -152,28 +200,76 @@ const Dashboard = ({ onLogout, userData }) => {
               </div>
             </div>
 
+            {/* Lista de posts existentes */}
             <div className="posts-list">
               {postsLoading ? (
                 <p>Cargando publicaciones...</p>
               ) : (
-                posts.map((post) => (
-                  <div key={post.id} className="post-card">
-                    <div className="post-header">
-                      <img
-                        src={post.thumb || "/avatar.png"}
-                        className="avatar-sm"
-                        alt="avatar"
-                      />
-                      <div>
-                        <strong>{post.nombre}</strong>
-                        <div className="post-role">{post.rol}</div>
+                <>
+                  {posts.map((post) => (
+                    <div key={post.id} className="post-card">
+                      <div className="post-header">
+                        <div className="avatar-container">
+                          {post.thumb ? (
+                            <img
+                              src={post.thumb}
+                              className="avatar-sm"
+                              alt="avatar"
+                            />
+                          ) : (
+                            <FaUser size={24} color="gray" />
+                          )}
+                        </div>
+                        <div className="post-user-info">
+                          <div className="post-user-name">{post.nombre}</div>
+                          <div className="post-user-role">{post.rol}</div>
+                        </div>
+                      </div>
+                      <div className="post-content">
+                        <p style={{ whiteSpace: 'pre-line' }}>{post.contenido}</p>
+                        {post.imagen_pub && (
+                          <img
+                            src={post.imagen_pub}
+                            alt="Publicación"
+                            className="post-image"
+                          />
+                        )}
+                      </div>
+                      <div className="post-footer">
+                        <span>{post.like} Me gusta</span>
+                        <span>
+                          {formatDistanceToNow(new Date(post.created_at), {
+                            addSuffix: true,
+                            locale: es
+                          })}
+                        </span>
                       </div>
                     </div>
-                    <div className="post-body">
-                      <p>{post.contenido}</p>
-                    </div>
+                  ))}
+
+                  {/* Controles de paginación */}
+                  <div className="pagination-controls">
+                    <button
+                      onClick={handlePrevPage}
+                      disabled={!pagination.prevPageUrl || postsLoading}
+                      className="pagination-btn"
+                    >
+                      <FaArrowLeft /> Anterior
+                    </button>
+
+                    <span className="page-info">
+                      Página {pagination.currentPage} de {pagination.lastPage}
+                    </span>
+
+                    <button
+                      onClick={handleNextPage}
+                      disabled={!pagination.nextPageUrl || postsLoading}
+                      className="pagination-btn"
+                    >
+                      Siguiente <FaArrowRight />
+                    </button>
                   </div>
-                ))
+                </>
               )}
             </div>
           </section>
