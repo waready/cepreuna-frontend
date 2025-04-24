@@ -152,15 +152,16 @@ const Dashboard = ({ onLogout, userData }) => {
   // Función para procesar y organizar los cuadernillos con validación de fechas
   const processCuadernillosData = (data) => {
     if (!data?.cuadernillos) return [];
-
+  
     const categoriasMap = new Map();
-
+    const CORRECT_BASE_URL = "https://sistemas.cepreuna.edu.pe/storage/documentos/";
+  
     data.cuadernillos.forEach((categoria) => {
       if (!categoria?.cuadernillos?.length) return;
-
+  
       const denominacion = categoria.denominacion || "General";
       const color = categoria.color || "#6c757d";
-
+  
       if (!categoriasMap.has(denominacion)) {
         categoriasMap.set(denominacion, {
           denominacion,
@@ -168,41 +169,60 @@ const Dashboard = ({ onLogout, userData }) => {
           semanas: new Map(),
         });
       }
-
+  
+      const cuadernillosUnicos = new Map();
+  
       categoria.cuadernillos.forEach((cuadernillo) => {
+        const claveUnica = `${cuadernillo.semana}_${cuadernillo.nombre}`;
+        
+        if (cuadernillosUnicos.has(claveUnica)) {
+          return;
+        }
+        cuadernillosUnicos.set(claveUnica, true);
+  
         const semana = cuadernillo.semana || 0;
         const categoriaData = categoriasMap.get(denominacion);
-
+  
         if (!categoriaData.semanas.has(semana)) {
           categoriaData.semanas.set(semana, []);
         }
-
-        // Validar y normalizar la fecha
+  
         let fechaValida = cuadernillo.created_at;
-        if (
-          !cuadernillo.created_at ||
-          isNaN(new Date(cuadernillo.created_at).getTime())
-        ) {
+        if (!cuadernillo.created_at || isNaN(new Date(cuadernillo.created_at).getTime())) {
           fechaValida = new Date().toISOString();
         }
-
+  
+        // Corregimos la URL aquí de manera segura
+        let archivoPath = cuadernillo.path || cuadernillo.url || "";
+        
+        // Si la ruta ya contiene la base URL incorrecta, la removemos
+        if (archivoPath.startsWith("https://sistemas.cepreuna.edu.pe")) {
+          archivoPath = archivoPath.replace("https://sistemas.cepreuna.edu.pe", "");
+        }
+        
+        // Si la ruta comienza con "/storage/documentos/", la dejamos tal cual
+        if (!archivoPath.startsWith("/storage/documentos/") && !archivoPath.startsWith("storage/documentos/")) {
+          // Si es una ruta relativa como "04-2025/archivo.pdf", le agregamos "/storage/documentos/"
+          if (!archivoPath.startsWith("/")) {
+            archivoPath = "/" + archivoPath;
+          }
+          archivoPath = "/storage/documentos" + archivoPath;
+        }
+  
+        // Construimos la URL final
+        const archivoUrl = CORRECT_BASE_URL + archivoPath.replace(/^\/storage\/documentos\//, "");
+  
         categoriaData.semanas.get(semana).push({
-          id:
-            cuadernillo.id ||
-            `${denominacion}-${semana}-${Math.random()
-              .toString(36)
-              .substr(2, 5)}`,
+          id: cuadernillo.id || `${denominacion}-${semana}-${Math.random().toString(36).substr(2, 5)}`,
           nombre: cuadernillo.nombre || `${denominacion} - Semana ${semana}`,
           descripcion: cuadernillo.descripcion || "",
-          archivo_url: `${categoria.base_path || ""}${
-            cuadernillo.path || cuadernillo.url || ""
-          }`,
+          archivo_url: archivoUrl,
           semana,
           fecha: fechaValida,
         });
       });
     });
-
+  
     return Array.from(categoriasMap.values()).map((categoria) => ({
       ...categoria,
       semanas: Array.from(categoria.semanas.entries())
@@ -346,40 +366,47 @@ const Dashboard = ({ onLogout, userData }) => {
   );
 
   // Componente CuadernilloCompactCard optimizado
-  const CuadernilloCompactCard = useCallback(
-    ({ categoria }) => (
-      <div
-        className="cuadernillo-compact-card"
-        style={{ borderLeft: `4px solid ${categoria.color}` }}
-      >
+  const CuadernilloCompactCard = ({ categoria }) => {
+    const [expanded, setExpanded] = useState(false);
+    
+    const semanasToShow = expanded 
+      ? categoria.semanas 
+      : categoria.semanas.slice(0, 2);
+  
+    return (
+      <div className="cuadernillo-compact-card" style={{ 
+        borderLeft: `4px solid ${categoria.color}`,
+        marginBottom: '20px' // Espacio entre categorías
+      }}>
         <div className="compact-card-header">
           <h3 className="compact-card-title">{categoria.denominacion}</h3>
         </div>
         <div className="semanas-container">
-          {categoria.semanas.map(({ semana, cuadernillos }) => (
+          {semanasToShow.map(({ semana, cuadernillos }) => (
             <div key={semana} className="semana-item">
-              <span className="semana-label">Semana {semana}</span>
-              <div className="pdf-links">
-                {cuadernillos.map((cuadernillo) => (
-                  <a
-                    key={cuadernillo.id}
-                    href={cuadernillo.archivo_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="pdf-link"
-                    title={`Descargar ${cuadernillo.nombre}`}
-                  >
-                    <FaFilePdf />
-                  </a>
-                ))}
-              </div>
-            </div>
+            <a
+              href={cuadernillos[0]?.archivo_url} // Tomamos el primer cuadernillo de la semana
+              target="_blank"
+              rel="noopener noreferrer"
+              className="semana-link"
+              title={`Descargar semana ${semana}`}
+            >
+              Semana {semana} <FaFilePdf className="pdf-icon" />
+            </a>
+          </div>
           ))}
         </div>
+        {categoria.semanas.length > 2 && (
+          <button 
+            onClick={() => setExpanded(!expanded)} 
+            className="ver-mas-btn"
+          >
+            {expanded ? 'Ver menos...' : 'Ver más...'}
+          </button>
+        )}
       </div>
-    ),
-    []
-  );
+    );
+  };
 
   // Renderizado de la sección de cuadernillos optimizado
   const renderCuadernillosSection = () => (
@@ -394,7 +421,7 @@ const Dashboard = ({ onLogout, userData }) => {
           <FaSync /> {cuadernillosLoading ? "Actualizando..." : "Actualizar"}
         </button>
       </div>
-
+  
       {cuadernillosLoading ? (
         <div className="loading-spinner">
           <FaSpinner className="spinner-icon" />
