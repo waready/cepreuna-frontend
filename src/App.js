@@ -9,9 +9,9 @@ import './App.css';
 
 // Configuración de axios para reutilización
 const api = axios.create({
-  baseURL: `${process.env.REACT_APP_API_BASE_URL}`,
-  withCredentials: true,
-  timeout: 10000 // 10 segundos de timeout
+    baseURL: `${process.env.REACT_APP_API_BASE_URL}`,
+    withCredentials: true,
+    timeout: 10000 // 10 segundos de timeout
 });
 
 function App() {
@@ -44,7 +44,7 @@ function App() {
         try {
             setError(null);
             const sessionActive = localStorage.getItem('sessionActive');
-            
+
             if (!sessionActive) {
                 await handleCleanLogout();
                 return;
@@ -58,10 +58,11 @@ function App() {
             if (sessionResponse.data.success && userResponse.data) {
                 setIsLoggedIn(true);
                 setUserData({
-                    nombre: userResponse.data?.props?.usuario?.nombres,
+                    nombre: userResponse.data?.props?.usuario?.nombres + " " + userResponse.data?.props?.usuario?.paterno + " " + userResponse.data?.props?.usuario?.materno,
                     email: userResponse.data?.props?.usuario?.email,
                     avatar: userResponse.data?.props?.usuario?.profile_photo_path,
                     id_user: userResponse.data?.props?.user?.id,
+                    dni: userResponse.data?.props?.user?.nro_documento
                 });
             } else {
                 await handleCleanLogout();
@@ -89,7 +90,7 @@ function App() {
     const handleLoginSuccess = useCallback(async () => {
         try {
             const response = await api.get('/horario');
-            
+
             if (response.data) {
                 localStorage.setItem('sessionActive', 'true');
                 setIsLoggedIn(true);
@@ -131,59 +132,59 @@ function App() {
     return (
         <div className="App">
             <SessionTimeout logout={handleCleanLogout} />
-            
+
             <Routes>
-                <Route 
-                    path="/login" 
+                <Route
+                    path="/login"
                     element={
                         !isLoggedIn ? (
                             <Login onLogin={handleLoginSuccess} />
                         ) : (
                             <Navigate to="/dashboard" replace />
                         )
-                    } 
-                />
-                
-                <Route 
-                    path="/dashboard/*" 
-                    element={
-                        isLoggedIn ? (
-                            <Dashboard 
-                                onLogout={handleCleanLogout} 
-                                userData={userData} 
-                            />
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
-                    } 
-                />
-                
-                <Route 
-                    path="/quiz/:quizId" 
-                    element={
-                        isLoggedIn ? (
-                            <QuizSession 
-                                onLogout={handleCleanLogout} 
-                                userData={userData} 
-                            />
-                        ) : (
-                            <Navigate to="/login" replace />
-                        )
-                    } 
-                />
-                
-                <Route 
-                    path="/" 
-                    element={
-                        <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
-                    } 
+                    }
                 />
 
-                <Route 
-                    path="*" 
+                <Route
+                    path="/dashboard/*"
+                    element={
+                        isLoggedIn ? (
+                            <Dashboard
+                                onLogout={handleCleanLogout}
+                                userData={userData}
+                            />
+                        ) : (
+                            <Navigate to="/login" replace />
+                        )
+                    }
+                />
+
+                <Route
+                    path="/quiz/:quizId"
+                    element={
+                        isLoggedIn ? (
+                            <QuizSession
+                                onLogout={handleCleanLogout}
+                                userData={userData}
+                            />
+                        ) : (
+                            <Navigate to="/login" replace />
+                        )
+                    }
+                />
+
+                <Route
+                    path="/"
+                    element={
+                        <Navigate to={isLoggedIn ? "/dashboard" : "/login"} replace />
+                    }
+                />
+
+                <Route
+                    path="*"
                     element={
                         <Navigate to="/" replace />
-                    } 
+                    }
                 />
             </Routes>
         </div>

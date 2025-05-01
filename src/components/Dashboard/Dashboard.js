@@ -6,6 +6,7 @@ import {
   FaBook,
   FaHome,
   FaUser,
+  FaUserCheck,
   FaChalkboardTeacher,
   FaQuestionCircle,
   FaArrowLeft,
@@ -20,6 +21,7 @@ import { es } from "date-fns/locale";
 import "./Dashboard.css";
 import Seminarios from "../Seminarios/Seminarios";
 import Quizzes from "../Quizzes/Quizzes";
+import VocacionalSession from "../TestVocacional/VocacionalSession";
 
 // Componente para formatear fechas de forma segura
 const SafeDateFormatter = ({
@@ -152,16 +154,16 @@ const Dashboard = ({ onLogout, userData }) => {
   // Función para procesar y organizar los cuadernillos con validación de fechas
   const processCuadernillosData = (data) => {
     if (!data?.cuadernillos) return [];
-  
+
     const categoriasMap = new Map();
     const CORRECT_BASE_URL = "https://sistemas.cepreuna.edu.pe/storage/documentos/";
-  
+
     data.cuadernillos.forEach((categoria) => {
       if (!categoria?.cuadernillos?.length) return;
-  
+
       const denominacion = categoria.denominacion || "General";
       const color = categoria.color || "#6c757d";
-  
+
       if (!categoriasMap.has(denominacion)) {
         categoriasMap.set(denominacion, {
           denominacion,
@@ -169,37 +171,37 @@ const Dashboard = ({ onLogout, userData }) => {
           semanas: new Map(),
         });
       }
-  
+
       const cuadernillosUnicos = new Map();
-  
+
       categoria.cuadernillos.forEach((cuadernillo) => {
         const claveUnica = `${cuadernillo.semana}_${cuadernillo.nombre}`;
-        
+
         if (cuadernillosUnicos.has(claveUnica)) {
           return;
         }
         cuadernillosUnicos.set(claveUnica, true);
-  
+
         const semana = cuadernillo.semana || 0;
         const categoriaData = categoriasMap.get(denominacion);
-  
+
         if (!categoriaData.semanas.has(semana)) {
           categoriaData.semanas.set(semana, []);
         }
-  
+
         let fechaValida = cuadernillo.created_at;
         if (!cuadernillo.created_at || isNaN(new Date(cuadernillo.created_at).getTime())) {
           fechaValida = new Date().toISOString();
         }
-  
+
         // Corregimos la URL aquí de manera segura
         let archivoPath = cuadernillo.path || cuadernillo.url || "";
-        
+
         // Si la ruta ya contiene la base URL incorrecta, la removemos
         if (archivoPath.startsWith("https://sistemas.cepreuna.edu.pe")) {
           archivoPath = archivoPath.replace("https://sistemas.cepreuna.edu.pe", "");
         }
-        
+
         // Si la ruta comienza con "/storage/documentos/", la dejamos tal cual
         if (!archivoPath.startsWith("/storage/documentos/") && !archivoPath.startsWith("storage/documentos/")) {
           // Si es una ruta relativa como "04-2025/archivo.pdf", le agregamos "/storage/documentos/"
@@ -208,10 +210,10 @@ const Dashboard = ({ onLogout, userData }) => {
           }
           archivoPath = "/storage/documentos" + archivoPath;
         }
-  
+
         // Construimos la URL final
         const archivoUrl = CORRECT_BASE_URL + archivoPath.replace(/^\/storage\/documentos\//, "");
-  
+
         categoriaData.semanas.get(semana).push({
           id: cuadernillo.id || `${denominacion}-${semana}-${Math.random().toString(36).substr(2, 5)}`,
           nombre: cuadernillo.nombre || `${denominacion} - Semana ${semana}`,
@@ -222,7 +224,7 @@ const Dashboard = ({ onLogout, userData }) => {
         });
       });
     });
-  
+
     return Array.from(categoriasMap.values()).map((categoria) => ({
       ...categoria,
       semanas: Array.from(categoria.semanas.entries())
@@ -368,13 +370,13 @@ const Dashboard = ({ onLogout, userData }) => {
   // Componente CuadernilloCompactCard optimizado
   const CuadernilloCompactCard = ({ categoria }) => {
     const [expanded, setExpanded] = useState(false);
-    
-    const semanasToShow = expanded 
-      ? categoria.semanas 
+
+    const semanasToShow = expanded
+      ? categoria.semanas
       : categoria.semanas.slice(0, 2);
-  
+
     return (
-      <div className="cuadernillo-compact-card" style={{ 
+      <div className="cuadernillo-compact-card" style={{
         borderLeft: `4px solid ${categoria.color}`,
         marginBottom: '20px' // Espacio entre categorías
       }}>
@@ -384,21 +386,21 @@ const Dashboard = ({ onLogout, userData }) => {
         <div className="semanas-container">
           {semanasToShow.map(({ semana, cuadernillos }) => (
             <div key={semana} className="semana-item">
-            <a
-              href={cuadernillos[0]?.archivo_url} // Tomamos el primer cuadernillo de la semana
-              target="_blank"
-              rel="noopener noreferrer"
-              className="semana-link"
-              title={`Descargar semana ${semana}`}
-            >
-              Semana {semana} <FaFilePdf className="pdf-icon" />
-            </a>
-          </div>
+              <a
+                href={cuadernillos[0]?.archivo_url} // Tomamos el primer cuadernillo de la semana
+                target="_blank"
+                rel="noopener noreferrer"
+                className="semana-link"
+                title={`Descargar semana ${semana}`}
+              >
+                Semana {semana} <FaFilePdf className="pdf-icon" />
+              </a>
+            </div>
           ))}
         </div>
         {categoria.semanas.length > 2 && (
-          <button 
-            onClick={() => setExpanded(!expanded)} 
+          <button
+            onClick={() => setExpanded(!expanded)}
             className="ver-mas-btn"
           >
             {expanded ? 'Ver menos...' : 'Ver más...'}
@@ -421,7 +423,7 @@ const Dashboard = ({ onLogout, userData }) => {
           <FaSync /> {cuadernillosLoading ? "Actualizando..." : "Actualizar"}
         </button>
       </div>
-  
+
       {cuadernillosLoading ? (
         <div className="loading-spinner">
           <FaSpinner className="spinner-icon" />
@@ -486,6 +488,15 @@ const Dashboard = ({ onLogout, userData }) => {
         </section>
       ),
       cuadernillos: renderCuadernillosSection(),
+      "test-vocacional": (
+        <VocacionalSession
+          estudiante={{
+            id: userData?.id_user,
+            nombre: userData?.nombre,
+            dni: userData?.dni,  // asegúrate que venga el dni en userData
+          }}
+        />
+      ),
       default: (
         <section className="home-section">
           <div className="post-box">
@@ -647,6 +658,12 @@ const Dashboard = ({ onLogout, userData }) => {
             className={activeTab === "cuadernillos" ? "active" : ""}
           >
             <FaBookOpen /> Cuadernillos
+          </button>
+          <button
+            onClick={() => changeTab("test-vocacional")}
+            className={activeTab === "test-vocacional" ? "active" : ""}
+          >
+            <FaUserCheck /> Test Vocacional
           </button>
           <button onClick={handleLogout} className="logout-btn">
             <FaSignOutAlt /> Cerrar Sesión
