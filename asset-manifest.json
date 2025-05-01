@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/cepreuna-frontend/static/css/main.f42c5f08.css",
-    "main.js": "/cepreuna-frontend/static/js/main.ae1e5e8c.js",
+    "main.css": "/cepreuna-frontend/static/css/main.5e9ba217.css",
+    "main.js": "/cepreuna-frontend/static/js/main.f2c8c046.js",
     "static/js/488.a5982ca9.chunk.js": "/cepreuna-frontend/static/js/488.a5982ca9.chunk.js",
     "index.html": "/cepreuna-frontend/index.html",
-    "main.f42c5f08.css.map": "/cepreuna-frontend/static/css/main.f42c5f08.css.map",
-    "main.ae1e5e8c.js.map": "/cepreuna-frontend/static/js/main.ae1e5e8c.js.map",
+    "main.5e9ba217.css.map": "/cepreuna-frontend/static/css/main.5e9ba217.css.map",
+    "main.f2c8c046.js.map": "/cepreuna-frontend/static/js/main.f2c8c046.js.map",
     "488.a5982ca9.chunk.js.map": "/cepreuna-frontend/static/js/488.a5982ca9.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f42c5f08.css",
-    "static/js/main.ae1e5e8c.js"
+    "static/css/main.5e9ba217.css",
+    "static/js/main.f2c8c046.js"
   ]
 }
