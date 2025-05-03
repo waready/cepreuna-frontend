@@ -33,7 +33,7 @@
 .username {
   margin-top: 10px;
   font-weight: bold;
-  color: #333;
+  color: #dfdcdc;
 }
 
 .nav-menu {
@@ -602,4 +602,116 @@ html, body {
 .sidebar {
   height: 100vh;
   overflow: hidden;
+}
+
+/* Estilos base para el menú toggle */
+.menu-toggle {
+  display: none; /* Oculto por defecto */
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1001;
+  background: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Sidebar - Versión escritorio (siempre visible) */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 250px;
+  background: #2c3e50;
+  z-index: 1000;
+  overflow-y: auto;
+  color: #ecf0f1;
+  transition: transform 0.3s ease;
+}
+
+/* Overlay (solo para móviles) */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Contenido principal */
+.main-content {
+  margin-left: 250px; /* Espacio para el sidebar */
+  transition: margin-left 0.3s ease;
+}
+
+/* Estilos para los elementos del menú */
+.profile-box {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.nav-menu button {
+  color: #ecf0f1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.nav-menu button svg {
+  color: #ecf0f1;
+  font-size: 1.2rem;
+}
+
+.nav-menu button:hover,
+.nav-menu button.active {
+  background-color: #34495e;
+}
+
+/* Media queries para móviles */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block; /* Mostrar solo en móviles */
+  }
+  
+  .sidebar {
+    transform: translateX(-100%); /* Oculto inicialmente en móviles */
+  }
+  
+  .sidebar.active {
+    transform: translateX(0); /* Mostrar cuando está activo */
+  }
+  
+  .overlay.active {
+    display: block; /* Mostrar overlay solo en móviles */
+  }
+  
+  .main-content {
+    margin-left: 0; /* Quitar margen en móviles */
+  }
+  
+  /* Ajustes para el header en móviles */
+  .main-content header {
+    padding-top: 20px;
+  }
+  
+  .main-content header h1 {
+    font-size: 1.5rem;
+  }
 }

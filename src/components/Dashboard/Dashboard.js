@@ -65,6 +65,7 @@ const Dashboard = ({ onLogout, userData }) => {
   const [cuadernillos, setCuadernillos] = useState([]);
   const [cuadernillosLoading, setCuadernillosLoading] = useState(false);
   const [cuadernillosLoaded, setCuadernillosLoaded] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -97,6 +98,11 @@ const Dashboard = ({ onLogout, userData }) => {
       navigate("/login");
     }
   }, [api, onLogout, navigate]);
+
+  // Función para alternar el menú
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen((prev) => !prev);
+  }, []);
 
   // Función para cargar publicaciones con validación de fechas
   const fetchPublicaciones = useCallback(
@@ -156,7 +162,8 @@ const Dashboard = ({ onLogout, userData }) => {
     if (!data?.cuadernillos) return [];
 
     const categoriasMap = new Map();
-    const CORRECT_BASE_URL = "https://sistemas.cepreuna.edu.pe/storage/documentos/";
+    const CORRECT_BASE_URL =
+      "https://sistemas.cepreuna.edu.pe/storage/documentos/";
 
     data.cuadernillos.forEach((categoria) => {
       if (!categoria?.cuadernillos?.length) return;
@@ -190,7 +197,10 @@ const Dashboard = ({ onLogout, userData }) => {
         }
 
         let fechaValida = cuadernillo.created_at;
-        if (!cuadernillo.created_at || isNaN(new Date(cuadernillo.created_at).getTime())) {
+        if (
+          !cuadernillo.created_at ||
+          isNaN(new Date(cuadernillo.created_at).getTime())
+        ) {
           fechaValida = new Date().toISOString();
         }
 
@@ -199,11 +209,17 @@ const Dashboard = ({ onLogout, userData }) => {
 
         // Si la ruta ya contiene la base URL incorrecta, la removemos
         if (archivoPath.startsWith("https://sistemas.cepreuna.edu.pe")) {
-          archivoPath = archivoPath.replace("https://sistemas.cepreuna.edu.pe", "");
+          archivoPath = archivoPath.replace(
+            "https://sistemas.cepreuna.edu.pe",
+            ""
+          );
         }
 
         // Si la ruta comienza con "/storage/documentos/", la dejamos tal cual
-        if (!archivoPath.startsWith("/storage/documentos/") && !archivoPath.startsWith("storage/documentos/")) {
+        if (
+          !archivoPath.startsWith("/storage/documentos/") &&
+          !archivoPath.startsWith("storage/documentos/")
+        ) {
           // Si es una ruta relativa como "04-2025/archivo.pdf", le agregamos "/storage/documentos/"
           if (!archivoPath.startsWith("/")) {
             archivoPath = "/" + archivoPath;
@@ -212,10 +228,16 @@ const Dashboard = ({ onLogout, userData }) => {
         }
 
         // Construimos la URL final
-        const archivoUrl = CORRECT_BASE_URL + archivoPath.replace(/^\/storage\/documentos\//, "");
+        const archivoUrl =
+          CORRECT_BASE_URL +
+          archivoPath.replace(/^\/storage\/documentos\//, "");
 
         categoriaData.semanas.get(semana).push({
-          id: cuadernillo.id || `${denominacion}-${semana}-${Math.random().toString(36).substr(2, 5)}`,
+          id:
+            cuadernillo.id ||
+            `${denominacion}-${semana}-${Math.random()
+              .toString(36)
+              .substr(2, 5)}`,
           nombre: cuadernillo.nombre || `${denominacion} - Semana ${semana}`,
           descripcion: cuadernillo.descripcion || "",
           archivo_url: archivoUrl,
@@ -298,6 +320,7 @@ const Dashboard = ({ onLogout, userData }) => {
       }
       setActiveTab(tab);
       navigate(`/dashboard?tab=${tab}`);
+      setIsMenuOpen(false); // Cerrar menú al cambiar de pestaña
     },
     [navigate, cuadernillosLoaded, fetchCuadernillos]
   );
@@ -376,10 +399,13 @@ const Dashboard = ({ onLogout, userData }) => {
       : categoria.semanas.slice(0, 2);
 
     return (
-      <div className="cuadernillo-compact-card" style={{
-        borderLeft: `4px solid ${categoria.color}`,
-        marginBottom: '20px' // Espacio entre categorías
-      }}>
+      <div
+        className="cuadernillo-compact-card"
+        style={{
+          borderLeft: `4px solid ${categoria.color}`,
+          marginBottom: "20px", // Espacio entre categorías
+        }}
+      >
         <div className="compact-card-header">
           <h3 className="compact-card-title">{categoria.denominacion}</h3>
         </div>
@@ -403,7 +429,7 @@ const Dashboard = ({ onLogout, userData }) => {
             onClick={() => setExpanded(!expanded)}
             className="ver-mas-btn"
           >
-            {expanded ? 'Ver menos...' : 'Ver más...'}
+            {expanded ? "Ver menos..." : "Ver más..."}
           </button>
         )}
       </div>
@@ -493,7 +519,7 @@ const Dashboard = ({ onLogout, userData }) => {
           estudiante={{
             id: userData?.id_user,
             nombre: userData?.nombre,
-            dni: userData?.dni,  // asegúrate que venga el dni en userData
+            dni: userData?.dni, // asegúrate que venga el dni en userData
           }}
         />
       ),
@@ -610,7 +636,18 @@ const Dashboard = ({ onLogout, userData }) => {
 
   return (
     <div className="dashboard-layout">
-      <aside className="sidebar">
+      {/* Botón de toggle para móviles */}
+      <button className="menu-toggle" onClick={toggleMenu}>
+        {isMenuOpen ? "✕" : "☰"}
+      </button>
+
+      {/* Overlay para cerrar el menú */}
+      <div
+        className={`overlay ${isMenuOpen ? "active" : ""}`}
+        onClick={toggleMenu}
+      />
+
+      <aside className={`sidebar ${isMenuOpen ? "active" : ""}`}>
         <div className="profile-box">
           <img
             src={userData.avatar || "https://via.placeholder.com/150"}
@@ -622,6 +659,7 @@ const Dashboard = ({ onLogout, userData }) => {
           />
           <p className="username">{userData.nombre}</p>
         </div>
+
         <nav className="nav-menu">
           <button
             onClick={() => changeTab("inicio")}
