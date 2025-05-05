@@ -15,6 +15,9 @@ import {
   FaSpinner,
   FaFilePdf,
   FaSync,
+  FaCalendarAlt,
+  FaClock,
+  FaLink
 } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -65,6 +68,9 @@ const Dashboard = ({ onLogout, userData }) => {
   const [cuadernillos, setCuadernillos] = useState([]);
   const [cuadernillosLoading, setCuadernillosLoading] = useState(false);
   const [cuadernillosLoaded, setCuadernillosLoaded] = useState(false);
+  const [horarioData, setHorarioData] = useState(null);
+  const [horarioLoading, setHorarioLoading] = useState(false);
+  const [horarioError, setHorarioError] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -72,6 +78,16 @@ const Dashboard = ({ onLogout, userData }) => {
     nextPageUrl: null,
     prevPageUrl: null,
   });
+
+  const diasSemana = {
+    "1": "Lunes",
+    "2": "Martes",
+    "3": "Miércoles",
+    "4": "Jueves",
+    "5": "Viernes",
+    "6": "Sábado",
+    "7": "Domingo"
+  };
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -103,6 +119,21 @@ const Dashboard = ({ onLogout, userData }) => {
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
   }, []);
+
+  // Función para cargar horarios
+  const fetchHorario = useCallback(async () => {
+    try {
+      setHorarioLoading(true);
+      setHorarioError("");
+      const { data } = await api.get("/horario");
+      setHorarioData(data);
+    } catch (err) {
+      console.error("Error al obtener el horario:", err);
+      setHorarioError("No se pudo cargar el horario. Intente nuevamente más tarde.");
+    } finally {
+      setHorarioLoading(false);
+    }
+  }, [api]);
 
   // Función para cargar publicaciones con validación de fechas
   const fetchPublicaciones = useCallback(
@@ -295,14 +326,20 @@ const Dashboard = ({ onLogout, userData }) => {
       if (activeTab === "cuadernillos" && !cuadernillosLoaded) {
         fetchCuadernillos();
       }
+
+      if (activeTab === "horarios" && !horarioData) {
+        fetchHorario();
+      }
     }
   }, [
     userData,
     activeTab,
     postsLoaded,
     cuadernillosLoaded,
+    horarioData,
     fetchPublicaciones,
     fetchCuadernillos,
+    fetchHorario,
     api,
     handleLogout,
   ]);
@@ -318,11 +355,14 @@ const Dashboard = ({ onLogout, userData }) => {
       if (tab === "cuadernillos" && !cuadernillosLoaded) {
         fetchCuadernillos();
       }
+      if (tab === "horarios" && !horarioData) {
+        fetchHorario();
+      }
       setActiveTab(tab);
       navigate(`/dashboard?tab=${tab}`);
       setIsMenuOpen(false); // Cerrar menú al cambiar de pestaña
     },
-    [navigate, cuadernillosLoaded, fetchCuadernillos]
+    [navigate, cuadernillosLoaded, fetchCuadernillos, horarioData, fetchHorario]
   );
 
   const handleCommentSubmit = useCallback(() => {
@@ -476,6 +516,92 @@ const Dashboard = ({ onLogout, userData }) => {
     </section>
   );
 
+  // Renderizado de la sección de horarios
+  const renderHorariosSection = () => (
+    <section className="horarios-section">
+      <div className="section-header">
+        <h2>Horario de Clases</h2>
+        <button
+          onClick={fetchHorario}
+          disabled={horarioLoading}
+          className="refresh-btn"
+        >
+          <FaSync /> {horarioLoading ? "Actualizando..." : "Actualizar"}
+        </button>
+      </div>
+
+      {horarioLoading ? (
+        <div className="loading-spinner">
+          <FaSpinner className="spinner-icon" />
+          <p>Cargando horario...</p>
+        </div>
+      ) : horarioError ? (
+        <div className="error-message">{horarioError}</div>
+      ) : !horarioData || !horarioData.horario ? (
+        <div className="empty-state">
+          <p>No hay información de horario disponible.</p>
+        </div>
+      ) : (
+        <>
+          <div className="horario-info">
+            <p><strong>Grupo:</strong> {horarioData.grupo}</p>
+            <p><strong>Área:</strong> {horarioData.area}</p>
+          </div>
+
+          <div className="horario-grid">
+            {horarioData.horario.map((turno) =>
+              turno.dias.map((dia) => {
+                // Filtrar solo los bloques que son clases (tipo 1)
+                const bloquesClase = dia.disponibilidad.filter(
+                  (bloque) => bloque.tipo === "1" && bloque.horario
+                );
+
+                if (bloquesClase.length === 0) return null;
+
+                return (
+                  <div key={`${turno.turno}-${dia.dia}`} className="dia-horario">
+                    <h3 className="dia-header">
+                      <FaCalendarAlt /> {diasSemana[dia.dia] || dia.dia}
+                    </h3>
+                    {bloquesClase.map((bloque, index) => (
+                      <div
+                        key={index}
+                        className="bloque-horario"
+                        style={{
+                          borderLeft: `4px solid ${bloque.horario.curso.color || '#3498db'}`,
+                        }}
+                      >
+                        <div className="bloque-hora">
+                          <FaClock /> {bloque.hora_inicio} - {bloque.hora_fin}
+                        </div>
+                        <div className="bloque-curso">
+                          {bloque.horario.curso.denominacion}
+                        </div>
+                        <div className="bloque-docente">
+                          <FaChalkboardTeacher /> {bloque.horario.docente}
+                        </div>
+                        {bloque.horario.carga.link && (
+                          <a
+                            href={bloque.horario.carga.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bloque-link"
+                          >
+                            <FaLink /> Unirse a la clase
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </>
+      )}
+    </section>
+  );
+
   // Renderizado condicional optimizado
   const renderContent = useCallback(() => {
     const tabs = {
@@ -514,12 +640,13 @@ const Dashboard = ({ onLogout, userData }) => {
         </section>
       ),
       cuadernillos: renderCuadernillosSection(),
+      horarios: renderHorariosSection(),
       "test-vocacional": (
         <VocacionalSession
           estudiante={{
             id: userData?.id_user,
             nombre: userData?.nombre,
-            dni: userData?.dni, // asegúrate que venga el dni en userData
+            dni: userData?.dni,
           }}
         />
       ),
@@ -619,10 +746,14 @@ const Dashboard = ({ onLogout, userData }) => {
     pagination,
     cuadernillos,
     cuadernillosLoading,
+    horarioData,
+    horarioLoading,
+    horarioError,
     handleCommentSubmit,
     handlePrevPage,
     handleNextPage,
     renderCuadernillosSection,
+    renderHorariosSection,
   ]);
 
   if (!userData?.nombre) {
@@ -696,6 +827,12 @@ const Dashboard = ({ onLogout, userData }) => {
             className={activeTab === "cuadernillos" ? "active" : ""}
           >
             <FaBookOpen /> Cuadernillos
+          </button>
+          <button
+            onClick={() => changeTab("horarios")}
+            className={activeTab === "horarios" ? "active" : ""}
+          >
+            <FaCalendarAlt /> Horarios
           </button>
           <button
             onClick={() => changeTab("test-vocacional")}

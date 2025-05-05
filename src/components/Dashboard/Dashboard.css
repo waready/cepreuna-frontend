@@ -491,6 +491,92 @@
   to { transform: rotate(360deg); }
 }
 
+/* Estilos para la sección de horarios */
+.horarios-section {
+  padding: 20px;
+}
+
+.horario-info {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.horario-info p {
+  margin: 5px 0;
+}
+
+.horario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.dia-horario {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 15px;
+}
+
+.dia-header {
+  color: #2c3e50;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bloque-horario {
+  margin: 15px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+.bloque-hora {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #3498db;
+}
+
+.bloque-curso {
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.bloque-docente {
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9em;
+}
+
+.bloque-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #27ae60;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bloque-link:hover {
+  text-decoration: underline;
+}
+
+.bloque-vacio {
+  color: #7f8c8d;
+  font-style: italic;
+  padding: 10px;
+}
 /* Responsive Styles */
 @media (max-width: 992px) {
   .main-content {
