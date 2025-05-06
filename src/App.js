@@ -113,7 +113,7 @@ function App() {
         return (
             <div className="app-loading">
                 <div className="loading-spinner" aria-label="Cargando"></div>
-                <p>Cargando aplicación...</p>
+                <p></p>
             </div>
         );
     }

@@ -1,51 +1,60 @@
+/* Página principal */
 .login-page {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     background-color: #f1f3f6;
+    padding: 1rem;
 }
 
+/* Tarjeta del login */
 .login-card {
-    width: 360px;
+    width: 100%;
+    max-width: 380px;
     padding: 32px;
     border-radius: 12px;
     background: #fff;
-    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
-/* Logo */
+/* Encabezado */
+.login-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
 .login-logo {
     width: 80px;
-    text-align: center;
+    margin-bottom: 0.5rem;
 }
 
-/* Título */
 .login-title {
-    font-size: 1.8rem;
-    font-weight: bold;
-    margin-bottom: 0.3rem;
+    font-size: 1.3rem;
+    font-weight: 700;
     color: #222;
+    margin: 0;
 }
 
-/* Subtítulo */
 .login-subtitle {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #666;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 /* Formulario */
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    /* text-align: left; */
+    gap: 1.2rem;
 }
 
-/* Grupo de inputs */
+/* Grupos de inputs */
+.form-group {
+    margin-top: 0.2rem;
+}
 .form-group label {
-    text-align: left;
     font-weight: 600;
     margin-bottom: 6px;
     display: block;
@@ -58,15 +67,17 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 1rem;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-group input:focus {
     border-color: #007bff;
     outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
 
-/* Botón de envío */
+
+/* Botón */
 button[type="submit"] {
     padding: 12px;
     border: none;
@@ -84,14 +95,16 @@ button[type="submit"]:hover {
 }
 
 button[type="submit"]:disabled {
-    background-color: #a5c6f8;
+    background-color: #d0d9e8;
+    color: #444;
     cursor: not-allowed;
 }
 
-/* Error */
+/* Mensaje de error */
 .error-message {
     color: #e53935;
     font-size: 0.9rem;
+    text-align: center;
     margin-top: -8px;
 }
 
@@ -99,12 +112,17 @@ button[type="submit"]:disabled {
 .login-footer {
     text-align: center;
     margin-top: 1rem;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     color: #555;
 }
 
 .signup-text {
-    color: #e53935;
-    font-weight: bold;
+    color: #007bff;
+    font-weight: 600;
     cursor: pointer;
+    transition: color 0.2s;
+}
+
+.signup-text:hover {
+    color: #0056b3;
 }

@@ -40,11 +40,12 @@ const Login = ({ onLogin }) => {
         <div className="login-page">
             <div className="login-card">
                 <form onSubmit={handleSubmit} className="login-form">
-                    <div className="text-center">
-                        <img src="/logo.png" alt="Logo" className="login-logo" />
+                    <div className="login-header">
+                        <img src={process.env.PUBLIC_URL + '/logo_oficial.png'} alt="Logo" className="login-logo" />
                         <h2 className="login-title">APP CEPREUNA</h2>
+                        <p className="login-subtitle">v. beta 1.0</p>
                     </div>
-
+    
                     <div className="form-group">
                         <label htmlFor="email">Email Institucional:</label>
                         <input
@@ -57,7 +58,7 @@ const Login = ({ onLogin }) => {
                             disabled={isLoading}
                         />
                     </div>
-
+    
                     <div className="form-group">
                         <label htmlFor="password">Contraseña:</label>
                         <input
@@ -70,20 +71,21 @@ const Login = ({ onLogin }) => {
                             disabled={isLoading}
                         />
                     </div>
-
+    
                     <button type="submit" disabled={isLoading}>
                         {isLoading ? 'Verificando...' : 'Iniciar Sesión'}
                     </button>
-
+    
                     {error && <p className="error-message">{error}</p>}
-
-                    <p className="login-footer">
-                        ¿No tienes una cuenta aún? <span className="signup-text">Regístrate</span>
-                    </p>
+    
+                    {/* <p className="login-footer">
+                        ¿No tienes una cuenta? <span className="signup-text">Regístrate</span>
+                    </p> */}
                 </form>
             </div>
         </div>
     );
+    
 };
 
 export default Login;
